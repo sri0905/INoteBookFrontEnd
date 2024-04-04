@@ -2,7 +2,6 @@ import noteContext from "./NoteContext";
 import React, { useState } from "react";
 
 const NoteState = (props) => {
-    const host = "http://localhost:4033";
     const Notes = []
         
 
@@ -16,9 +15,8 @@ const NoteState = (props) => {
             },
         });
         const json = await response.json()
-        const allNotes = json.notes
+        const allNotes = json
         setNotes(allNotes)
-        console.log(notes)
        
     }
     const addNote = async (title, description, tags) => {
@@ -31,36 +29,32 @@ const NoteState = (props) => {
             },
             body: JSON.stringify({title, description, tags}),
         });
-        const json = response.json();
+        const json = await response.json();
         console.log(json)
         const note = {
-            "_id": "66030765bf8f79149715aasd3rq3r3cb",
             "user": "6601c07b3708aaf371ba82b8",
             "title": title,
             "description": description,
             "tags": tags,
-            "date": "2024-03-26T17:35:33.715Z",
-            "__v": 0
         }
         setNotes(notes.concat(note))
     };
 
     const deleteNote = async (id) => {
-        const response = await fetch(`http://localhost:4033/api/notes/deleteNotes/${id}`, {
+        await fetch(`http://localhost:4033/api/notes/deleteNotes/${id}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
                 "auth-token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiNjYwMWMwN2IzNzA4YWFmMzcxYmE4MmI4IiwiaWF0IjoxNzExNDUwNDY4fQ.DfSIpCpq2nKhDZ_gJXT4aySZ3THc4_qtjX_w0ECVcw4"
             },
         });
-    
-       
-       
-       
+        
+        const newNotes = notes.filter((note)=>{return note._id !== id})
+       setNotes(newNotes)   
     };
 
     const editNote = async (id, title, description, tags) => {
-        const response = await fetch(`${host}//api/notes/updateNotes/${id}`, {
+        const response = await fetch(`http://localhost:4033/api/notes/updateNotes/${id}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -71,14 +65,17 @@ const NoteState = (props) => {
         const json = response.json();
         console.log(json)
         
-        for (let index = 0; index < notes.length; index++) {
-            const element = notes[index];
+        let newNotes = JSON.parse(JSON.stringify(notes))
+        for (let index = 0; index < newNotes.length; index++) {
+            const element = newNotes[index];
             if (element._id === id) {
-                element.title = title
-                element.description = description
-                element.tags = tags
+                newNotes[index].title = title
+                newNotes[index].description = description
+                newNotes[index].tags = tags
+                break;
             }
         }
+        setNotes(newNotes)
     };
 
     return (
